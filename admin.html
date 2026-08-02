@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>หลังบ้าน · ริลลดาพันธุ์ไม้</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="หลังบ้านร้าน">
+<meta name="theme-color" content="#3f6b3f">
+<link rel="apple-touch-icon" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f8f0;--panel:#ffffff;--ink:#26382a;--ink-soft:#5c6f5a;
+    --moss:#6f9464;--moss-deep:#3f6b3f;--line:rgba(63,107,63,0.18);
+    --danger:#b3492f;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;
+    -webkit-text-size-adjust:100%;padding-bottom:80px;}
+  header{position:sticky;top:0;z-index:20;background:var(--moss-deep);color:#fff;
+    padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,0.12);}
+  header h1{font-size:16px;margin:0;font-weight:600;}
+  header .status{font-family:'IBM Plex Mono',monospace;font-size:10.5px;opacity:0.85;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px;}
+
+  .tabs{display:flex;gap:6px;position:sticky;top:52px;z-index:15;background:var(--bg);
+    padding:10px 0;margin-bottom:4px;}
+  .tab{flex:1;text-align:center;padding:9px 4px;border-radius:10px;font-size:12.5px;font-weight:600;
+    background:var(--panel);color:var(--ink-soft);border:1px solid var(--line);cursor:pointer;}
+  .tab.active{background:var(--moss-deep);color:#fff;border-color:var(--moss-deep);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(63,107,63,0.06);}
+  .card h3{margin:0 0 12px;font-size:14px;color:var(--moss-deep);display:flex;align-items:center;justify-content:space-between;}
+  label{display:block;font-size:11.5px;color:var(--ink-soft);margin:10px 0 4px;font-weight:600;}
+  input,textarea{width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fbfdfa;}
+  input:focus,textarea:focus{outline:none;border-color:var(--moss);}
+  textarea{resize:vertical;min-height:64px;line-height:1.5;}
+  .thumb{width:100%;height:130px;object-fit:cover;border-radius:9px;margin-top:8px;border:1px solid var(--line);background:#eef4e8;}
+  .row2{display:flex;gap:10px;}.row2>div{flex:1;}
+
+  button{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;border:none;border-radius:10px;
+    padding:11px 16px;cursor:pointer;}
+  .btn-save{background:var(--moss-deep);color:#fff;}
+  .btn-add{background:var(--panel);color:var(--moss-deep);border:1.5px dashed var(--moss);width:100%;padding:13px;}
+  .btn-del{background:transparent;color:var(--danger);font-size:12px;padding:4px 8px;}
+  .savebar{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line);
+    padding:12px 16px;display:flex;gap:10px;z-index:25;box-shadow:0 -2px 12px rgba(0,0,0,0.06);}
+  .savebar button{flex:1;}
+  .savebar .dirty{color:var(--danger);font-size:11.5px;align-self:center;flex:0 0 auto;font-family:'IBM Plex Mono',monospace;}
+
+  .hint{font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.5;}
+  .login-box{max-width:340px;margin:60px auto;text-align:center;padding:0 20px;}
+  .login-box input{margin:6px 0;text-align:center;}
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:10px 18px;border-radius:20px;font-size:12.5px;z-index:40;opacity:0;transition:opacity .25s;pointer-events:none;}
+  .toast.show{opacity:1;}
+  .hidden{display:none!important;}
+
+  .pin-btn{background:rgba(255,255,255,0.16);border:none;border-radius:9px;padding:6px 8px 3px;
+    cursor:pointer;display:flex;align-items:center;}
+  .pin-btn:active{background:rgba(255,255,255,0.28);}
+  .modal-bg{position:fixed;inset:0;background:rgba(20,30,22,0.55);z-index:60;display:flex;
+    align-items:flex-end;justify-content:center;}
+  .modal{background:var(--panel);border-radius:20px 20px 0 0;width:100%;max-width:460px;
+    padding:22px 22px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,0.2);}
+  .modal h3{margin:0 0 4px;color:var(--moss-deep);font-size:17px;}
+  .modal .lead{font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;line-height:1.5;}
+  .step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+  .step .num{flex:0 0 26px;height:26px;border-radius:50%;background:var(--moss-deep);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;}
+  .step .txt{font-size:13px;line-height:1.5;padding-top:2px;}
+  .step .txt b{color:var(--moss-deep);}
+  .step .ic{display:inline-flex;vertical-align:-3px;margin:0 2px;}
+  .modal .close{width:100%;margin-top:8px;background:var(--moss-deep);color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" class="login-box">
+  <h2 style="color:var(--moss-deep);">หลังบ้านร้านต้นไม้</h2>
+  <p class="hint">สำหรับเจ้าของร้านเท่านั้น</p>
+  <input id="liEmail" type="email" placeholder="owner@rinlada.local" autocomplete="username">
+  <input id="liPass" type="password" placeholder="รหัสผ่าน" autocomplete="current-password">
+  <button class="btn-save" style="width:100%;margin-top:10px;" onclick="doLogin()">เข้าสู่ระบบ</button>
+  <p id="liErr" class="hint" style="color:var(--danger);"></p>
+</div>
+
+<!-- APP -->
+<div id="appView" class="hidden">
+  <header>
+    <h1>🌿 หลังบ้านร้านต้นไม้</h1>
+    <span style="display:flex;align-items:center;gap:10px;">
+      <span class="status" id="status">พร้อม</span>
+      <button class="pin-btn" onclick="showPin()" title="ปักหมุดหน้า Home">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><rect x="4" y="13" width="16" height="8" rx="2"/></svg>
+      </button>
+    </span>
+  </header>
+
+  <div class="wrap">
+    <div class="tabs">
+      <div class="tab active" data-tab="gardens" onclick="switchTab('gardens')">สไตล์สวน</div>
+      <div class="tab" data-tab="plants" onclick="switchTab('plants')">เมนูต้นไม้</div>
+      <div class="tab" data-tab="contact" onclick="switchTab('contact')">หน้าปก/ติดต่อ</div>
+    </div>
+
+    <div id="tab-gardens">
+      <div id="gardenList"></div>
+      <button class="btn-add" onclick="addGarden()">+ เพิ่มสไตล์สวน</button>
+    </div>
+
+    <div id="tab-plants" class="hidden">
+      <div id="plantList"></div>
+      <button class="btn-add" onclick="addPlant()">+ เพิ่มต้นไม้</button>
+    </div>
+
+    <div id="tab-contact" class="hidden">
+      <div class="card">
+        <h3>หน้าปก</h3>
+        <label>ชื่อร้าน</label><input id="c_title">
+        <label>คำโปรยใต้ชื่อ</label><input id="c_subtitle">
+      </div>
+      <div class="card">
+        <h3>ติดต่อ (สไลด์สุดท้าย)</h3>
+        <label>หัวข้อ</label><input id="ct_title">
+        <label>คำเชิญชวน</label><textarea id="ct_desc"></textarea>
+        <label>LINE</label><input id="ct_line">
+        <label>เบอร์โทร</label><input id="ct_phone">
+        <label>Facebook</label><input id="ct_facebook">
+      </div>
+    </div>
+  </div>
+
+  <div class="savebar">
+    <span class="dirty hidden" id="dirtyFlag">● ยังไม่บันทึก</span>
+    <button class="btn-save" onclick="saveAll()">บันทึกทั้งหมด</button>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="pinModal" onclick="hidePinBg(event)">
+  <div class="modal">
+    <h3>📌 ปักหมุดหน้านี้ไว้หน้าจอ</h3>
+    <p class="lead">เพิ่มหลังบ้านลงหน้า Home จะเปิดใช้ได้เร็วเหมือนแอป ไม่ต้องพิมพ์ลิงก์ทุกครั้ง</p>
+    <div class="step"><div class="num">1</div><div class="txt">แตะปุ่ม <b>แชร์</b>
+      <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3f6b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></span>
+      ด้านล่างของ Safari</div></div>
+    <div class="step"><div class="num">2</div><div class="txt">เลื่อนหา <b>เพิ่มลงในหน้าจอโฮม</b> (Add to Home Screen)
+      <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3f6b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg></span></div></div>
+    <div class="step"><div class="num">3</div><div class="txt">แตะ <b>เพิ่ม</b> (Add) มุมขวาบน — เสร็จแล้ว! ไอคอนใบไม้จะไปอยู่หน้าจอ</div></div>
+    <button class="close" onclick="hidePin()">เข้าใจแล้ว</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  /* ==========================================================
+     CONFIG — เติมค่าจริง 2 จุด
+     ========================================================== */
+  const API_KEY = 'AIzaSyDBIRpyH5Hvp-mMqs5i9LmWzk1w0toYQZw';
+  const PROJECT = 'rinlada-plant-stock';
+  /* ล็อกอินด้วยบัญชีเจ้าของร้าน owner@rinlada.local (พิมพ์ตอนเข้าหน้านี้) */
+  /* ========================================================== */
+
+  const BASE=`https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
+  let idToken=null, dirty=false;
+  let state={ gardens:[], plants:[], cover:{}, contact:{} };
+
+  /* ---- type wrappers ---- */
+  function toFs(v){
+    if(v===null||v===undefined) return {nullValue:null};
+    if(typeof v==='string') return {stringValue:v};
+    if(typeof v==='boolean') return {booleanValue:v};
+    if(typeof v==='number') return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};
+    if(Array.isArray(v)) return {arrayValue:{values:v.map(toFs)}};
+    if(typeof v==='object'){const f={};for(const k in v)f[k]=toFs(v[k]);return {mapValue:{fields:f}};}
+    return {stringValue:String(v)};
+  }
+  function fromFs(f){
+    if(!f) return null;
+    if('stringValue' in f) return f.stringValue;
+    if('integerValue' in f) return parseInt(f.integerValue,10);
+    if('doubleValue' in f) return f.doubleValue;
+    if('booleanValue' in f) return f.booleanValue;
+    if('arrayValue' in f) return (f.arrayValue.values||[]).map(fromFs);
+    if('mapValue' in f){const o={};const fl=f.mapValue.fields||{};for(const k in fl)o[k]=fromFs(fl[k]);return o;}
+    if('nullValue' in f) return null;
+    return null;
+  }
+  function docToObj(doc){const o=fromFs({mapValue:{fields:doc.fields||{}}});o._id=doc.name.split('/').pop();return o;}
+  const H=()=>({'Content-Type':'application/json','Authorization':'Bearer '+idToken});
+
+  async function listDocs(col){
+    let out=[],token='';
+    do{
+      const url=`${BASE}/${col}?pageSize=300`+(token?`&pageToken=${token}`:'');
+      const d=await(await fetch(url,{headers:H()})).json();
+      (d.documents||[]).forEach(doc=>out.push(docToObj(doc)));
+      token=d.nextPageToken||'';
+    }while(token);
+    return out;
+  }
+  async function getDoc(path){
+    const d=await(await fetch(`${BASE}/${path}`,{headers:H()})).json();
+    if(d.error||!d.fields) return null;
+    return docToObj(d);
+  }
+  async function setDoc(col,id,obj){
+    const fields={};for(const k in obj) fields[k]=toFs(obj[k]);
+    // ใช้ PATCH แบบไม่มี updateMask = เขียนทับทั้ง doc (ตั้งใจ เพราะเราส่งครบทุกฟิลด์)
+    return fetch(`${BASE}/${col}/${encodeURIComponent(id)}`,{method:'PATCH',headers:H(),body:JSON.stringify({fields})});
+  }
+  async function delDoc(col,id){ return fetch(`${BASE}/${col}/${encodeURIComponent(id)}`,{method:'DELETE',headers:H()}); }
+
+  /* ---- login ---- */
+  window.doLogin=async function(){
+    const email=document.getElementById('liEmail').value.trim();
+    const pass=document.getElementById('liPass').value;
+    const err=document.getElementById('liErr');
+    err.textContent='';
+    if(API_KEY.startsWith('ใส่')){ err.textContent='ยังไม่ได้ตั้งค่า API_KEY ในไฟล์'; return; }
+    try{
+      const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email,password:pass,returnSecureToken:true})
+      });
+      const d=await r.json();
+      if(d.error) throw new Error(d.error.message);
+      idToken=d.idToken;
+      try{ localStorage.setItem('rinlada_email',email); }catch(e){}
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('appView').classList.remove('hidden');
+      await loadAll();
+    }catch(e){
+      err.textContent='เข้าสู่ระบบไม่สำเร็จ — ตรวจอีเมล/รหัสผ่าน';
+    }
+  };
+  try{ const e=localStorage.getItem('rinlada_email'); if(e) document.getElementById('liEmail').value=e; }catch(e){}
+
+  /* ---- load ---- */
+  async function loadAll(){
+    setStatus('กำลังโหลด…');
+    const [gardens,plants,cover,contact]=await Promise.all([
+      listDocs('gardens'), listDocs('plants'), getDoc('config/cover'), getDoc('config/contact')
+    ]);
+    state.gardens=gardens.sort((a,b)=>(a.order||0)-(b.order||0));
+    state.plants=plants.sort((a,b)=>(a.order||0)-(b.order||0));
+    state.cover=cover||{title:'ริลลดาพันธุ์ไม้',subtitle:'GARDEN LOOKBOOK · แรงบันดาลใจสวนในฝันของคุณ'};
+    state.contact=contact||{title:'สนใจจัดสวนสไตล์ไหน?',desc:'ทักหาเราได้เลย ทีมงานยินดีให้คำปรึกษาและประเมินงบประมาณเบื้องต้นฟรี',line:'@rinlada-plant',phone:'095-121-0221',facebook:'รินลดา พันธุ์ไม้'};
+    renderGardens(); renderPlants(); renderContact();
+    setStatus('พร้อม'); setDirty(false);
+  }
+
+  /* ---- render gardens ---- */
+  function renderGardens(){
+    const box=document.getElementById('gardenList');
+    box.innerHTML=state.gardens.map((g,i)=>`
+      <div class="card">
+        <h3>สวน #${i+1}<button class="btn-del" onclick="delGarden(${i})">ลบ</button></h3>
+        <label>ชื่อสไตล์สวน</label>
+        <input value="${attr(g.title)}" oninput="upG(${i},'title',this.value)">
+        <label>คำอธิบาย</label>
+        <textarea oninput="upG(${i},'desc',this.value)">${esc(g.desc)}</textarea>
+        <div class="row2">
+          <div><label>งบประมาณ</label><input value="${attr(g.budget)}" oninput="upG(${i},'budget',this.value)" placeholder="15,000–40,000฿"></div>
+          <div><label>ลำดับ</label><input type="number" value="${g.order||i+1}" oninput="upG(${i},'order',parseInt(this.value)||0)"></div>
+        </div>
+        <label>ต้นไม้ที่ใช้ (คั่นด้วยจุลภาค , )</label>
+        <input value="${attr((g.plants||[]).join(', '))}" oninput="upGPlants(${i},this.value)">
+        <label>ลิงก์รูปสวน (วาง URL รูป — เว้นว่างจะใช้ภาพวาดแทน)</label>
+        <input value="${attr(g.photo)}" oninput="upG(${i},'photo',this.value)" placeholder="https://...">
+        ${g.photo?`<img class="thumb" src="${attr(g.photo)}" onerror="this.style.display='none'">`:''}
+        <p class="hint">💡 อัปรูปไว้ที่อัลบั้มสาธารณะ/เว็บรูป แล้วคัดลอกลิงก์ภาพมาวาง</p>
+      </div>`).join('');
+  }
+  window.upG=function(i,k,v){ state.gardens[i][k]=v; setDirty(true); if(k==='photo') renderGardens(); };
+  window.upGPlants=function(i,v){ state.gardens[i].plants=v.split(',').map(s=>s.trim()).filter(Boolean); setDirty(true); };
+  window.addGarden=function(){
+    state.gardens.push({_id:'g'+Date.now(),title:'สวนสไตล์ใหม่',desc:'',budget:'',plants:[],photo:'',order:state.gardens.length+1});
+    setDirty(true); renderGardens();
+  };
+  window.delGarden=function(i){
+    if(!confirm('ลบสวนนี้?')) return;
+    const g=state.gardens[i];
+    if(g._id) state._delGardens=(state._delGardens||[]).concat(g._id);
+    state.gardens.splice(i,1);
+    setDirty(true); renderGardens();
+  };
+
+  /* ---- render plants ---- */
+  function renderPlants(){
+    const box=document.getElementById('plantList');
+    box.innerHTML=state.plants.map((p,i)=>`
+      <div class="card" style="padding:12px;">
+        <div class="row2">
+          <div style="flex:2"><label>ชื่อต้นไม้</label><input value="${attr(p.name)}" oninput="upP(${i},'name',this.value)"></div>
+          <div style="flex:1.4"><label>หมวด</label><input value="${attr(p.cat)}" oninput="upP(${i},'cat',this.value)" placeholder="ไม้ประดับ"></div>
+          <div style="flex:0 0 44px;align-self:flex-end"><button class="btn-del" onclick="delPlant(${i})">ลบ</button></div>
+        </div>
+      </div>`).join('');
+  }
+  window.upP=function(i,k,v){ state.plants[i][k]=v; setDirty(true); };
+  window.addPlant=function(){
+    state.plants.push({_id:'p'+Date.now(),name:'',cat:'ไม้ประดับ',order:state.plants.length+1});
+    setDirty(true); renderPlants();
+  };
+  window.delPlant=function(i){
+    const p=state.plants[i];
+    if(p._id) state._delPlants=(state._delPlants||[]).concat(p._id);
+    state.plants.splice(i,1); setDirty(true); renderPlants();
+  };
+
+  /* ---- render contact/cover ---- */
+  function renderContact(){
+    v('c_title',state.cover.title); v('c_subtitle',state.cover.subtitle);
+    v('ct_title',state.contact.title); v('ct_desc',state.contact.desc);
+    v('ct_line',state.contact.line); v('ct_phone',state.contact.phone); v('ct_facebook',state.contact.facebook);
+    ['c_title','c_subtitle','ct_title','ct_desc','ct_line','ct_phone','ct_facebook'].forEach(id=>{
+      document.getElementById(id).oninput=()=>setDirty(true);
+    });
+  }
+
+  /* ---- save all ---- */
+  window.saveAll=async function(){
+    if(!idToken){ toast('ยังไม่ได้เข้าสู่ระบบ'); return; }
+    setStatus('กำลังบันทึก…');
+    try{
+      // cover + contact
+      state.cover={title:g('c_title'),subtitle:g('c_subtitle')};
+      state.contact={title:g('ct_title'),desc:g('ct_desc'),line:g('ct_line'),phone:g('ct_phone'),facebook:g('ct_facebook')};
+      await setDoc('config','cover',state.cover);
+      await setDoc('config','contact',state.contact);
+      // gardens
+      for(let i=0;i<state.gardens.length;i++){
+        const g=state.gardens[i]; const id=g._id||('g'+Date.now()+i);
+        await setDoc('gardens',id,{title:g.title||'',desc:g.desc||'',budget:g.budget||'',plants:g.plants||[],photo:g.photo||'',order:g.order||(i+1)});
+      }
+      for(const id of (state._delGardens||[])) await delDoc('gardens',id);
+      // plants
+      for(let i=0;i<state.plants.length;i++){
+        const p=state.plants[i]; const id=p._id||('p'+Date.now()+i);
+        await setDoc('plants',id,{name:p.name||'',cat:p.cat||'',order:p.order||(i+1)});
+      }
+      for(const id of (state._delPlants||[])) await delDoc('plants',id);
+      state._delGardens=[]; state._delPlants=[];
+      setDirty(false); setStatus('พร้อม'); toast('บันทึกเรียบร้อย ✓');
+      await loadAll();
+    }catch(e){ setStatus('ผิดพลาด'); toast('บันทึกไม่สำเร็จ — ลองใหม่'); }
+  };
+
+  /* ---- helpers ---- */
+  function switchTab(t){
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+    ['gardens','plants','contact'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('hidden',x!==t));
+  }
+  window.switchTab=switchTab;
+  function setDirty(d){ dirty=d; document.getElementById('dirtyFlag').classList.toggle('hidden',!d); }
+  function setStatus(s){ document.getElementById('status').textContent=s; }
+  function v(id,val){ document.getElementById(id).value=val==null?'':val; }
+  function g(id){ return document.getElementById(id).value; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function attr(s){ return String(s==null?'':s).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  let tt;
+  function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),2200); }
+  window.toast=toast;
+
+  window.showPin=function(){ document.getElementById('pinModal').classList.remove('hidden'); };
+  window.hidePin=function(){ document.getElementById('pinModal').classList.add('hidden'); };
+  window.hidePinBg=function(e){ if(e.target.id==='pinModal') hidePin(); };
+
+  window.addEventListener('beforeunload',e=>{ if(dirty){ e.preventDefault(); e.returnValue=''; } });
+</script>
+</body>
+</html>
